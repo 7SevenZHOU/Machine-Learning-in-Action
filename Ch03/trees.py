@@ -52,7 +52,33 @@ def chooseBestFeatrueToSplit(dataSet):
     for i in range(numFeatures):
         featList=[example[i] for example in dataSet]
         uniqueVals=set(featList)
-        
+        newEntropy=0.0
+        for value in uniqueVals:
+            subDataSet=splitDataSet(data,i,value)
+            prob=len(subDataSet)/float(len(dataSet))
+            newEntropy+= prob*calcShannonEntropy(subDataSet)
+        infoGain=baseEntropy-newEntropy
+        if(infoGain>bestInfoGain):
+            bestInfoGain=infoGain
+            bestFeature=i
+    return bestFeature
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

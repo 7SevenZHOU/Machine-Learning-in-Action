@@ -59,7 +59,7 @@ fig=plt.figure()
 ax=fig.add_subplot(111)
 #mark! scatter(x,y,scale,color)
 ax.scatter(datingDataMat[:,1],datingDataMat[:,2],15*array(datingLabels),15*array(datingLabels))
-plt.show(block=False)
+plt.show()
 
 def autoNorm(dataset):
     #The 0 in dataSet.min(0) allows you to take the minimums from the columns, not the rows.
@@ -79,7 +79,84 @@ print(nortMat)
 print(ranges)
 print(minVals)
 
-plt.show()
+
+
+
+def datingClassTest():
+    hoRatio=0.10
+    datingDataMat,datingLabels=file2matrix('datingTestSet.txt')
+    normMat,ranges,minVals=autoNorm(datingDataMat)
+    m=normMat.shape[0]
+    numTestVecs=int(m*hoRatio)
+    errorCount=0.0
+    for i in range(numTestVecs):
+        classifierResult=MykNN(normMat[i,:],normMat[numTestVecs:m,:],\
+            datingLabels[numTestVecs:m],3)
+        print('the classifier came back with: %d,the real answer is %d'%(classifierResult,datingLabels[i]))
+        if(classifierResult!=datingLabels[i]):
+            errorCount+=1.0
+    print('the total error rate is:%f'%(errorCount/float(numTestVecs)))
+
+datingClassTest()
+
+def classifyPerson():
+    resultList=['not at all','in small doses','in large doses']
+    percentTats=float(input('percentage of time spent playing video games?'))
+    ffMiles=float(input('requent flier miles earned per year?'))
+    iceCream=float(input('liters of ice cream sonsumed per year?'))
+    datingDataMat,datingLabels=file2matrix('datingTestSet.txt')
+    normMat,ranges,minVals=autoNorm(datingDataMat)
+    inArr=array([ffMiles,percentTats,iceCream])
+    classifierResult=MykNN((inArr-minVals)/ranges,normMat,datingLabels,3)
+    print('You will probably like this person:',resultList[classifierResult-1])
+
+#classifyPerson()
+
+def img2vector(filename):
+    returnVect = zeros((1,1024))
+    fr=open(filename)
+    for i in range(32):
+        lineStr=fr.readline()
+        for j in range(32):
+            returnVect[0,32*i+j]=int(lineStr[j])
+    return returnVect
+
+import os
+
+def handwritingClassTest():
+    hwLabels=[]
+    trainingFileList=os.listdir('trainingDigits')
+    m=len(trainingFileList)
+    trainingMat=zeros((m,1024))
+    for i in range(m):
+        fileNameStr=trainingFileList[i]
+        fileStr=fileNameStr.split('.')[0]
+        classNumStr=int(fileStr.split('_')[0])
+        hwLabels.append(classNumStr)
+        trainingMat[i,:]=img2vector('trainingDigits/%s'%fileNameStr)
+    testFileList=os.listdir('testDigits')
+    errorCount=0.0
+    mTest=len(testFileList)
+    for i in range(mTest):
+        fileNameStr=testFileList[i]
+        fileStr=fileNameStr.split('.')[0]
+        classNumStr=int(fileStr.split('_')[0])
+        vectorUnderTest=img2vector('testDigits/%s'%fileNameStr)
+        classifierResult=MykNN(vectorUnderTest,trainingMat,hwLabels,3)
+        print('the classifier came back with:%d,the real answer is:%d'%(classifierResult,classNumStr))
+        if(classifierResult!=classNumStr):
+            errorCount+=1.0
+    print('\nthe total number of errors is %d'%errorCount)
+    print('\nthe total error rate is:%f'%(errorCount/float(mTest)))
+
+handwritingClassTest()
+
+
+
+
+
+
+
 
 
 

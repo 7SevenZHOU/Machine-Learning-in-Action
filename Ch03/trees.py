@@ -21,10 +21,10 @@ def createDataSet():
     [1,0,'no'],\
     [0,1,'no'],\
     [0,1,'no']]
-    labels=['no surfacing','flippers']
-    return dataSet,labels
+    featuresName=['no surfacing','flippers']
+    return dataSet,featuresName
 
-myData,labels=createDataSet()
+myData,featuresNameList=createDataSet()
 print(myData)
 
 print(calcShannonEntropy(myData))
@@ -46,15 +46,16 @@ print(splitDataSet(myData,0,0))
 
 def chooseBestFeatrueToSplit(dataSet):
     numFeatures=len(dataSet[0])-1
-    baseEntropy=calcShannonEntropy(dataset)
+    baseEntropy=calcShannonEntropy(dataSet)
     bestInfoGain=0.0
     bestFeature=-1
     for i in range(numFeatures):
+        #mark!
         featList=[example[i] for example in dataSet]
         uniqueVals=set(featList)
         newEntropy=0.0
         for value in uniqueVals:
-            subDataSet=splitDataSet(data,i,value)
+            subDataSet=splitDataSet(dataSet,i,value)
             prob=len(subDataSet)/float(len(dataSet))
             newEntropy+= prob*calcShannonEntropy(subDataSet)
         infoGain=baseEntropy-newEntropy
@@ -62,6 +63,56 @@ def chooseBestFeatrueToSplit(dataSet):
             bestInfoGain=infoGain
             bestFeature=i
     return bestFeature
+
+print(chooseBestFeatrueToSplit(myData))
+
+import operator
+
+def majorityCnt(classList):
+    classCount={}
+    for vote in classList:
+        if vote not in classList.keys():
+            classList[vote]=0
+        classList[vote]+=1
+    sortedClassCount=sorted(classCount.item(),key=operator.itemgetter(1),reverse=True)
+    return sortedClassCount[0][0]
+
+def createTree(dataSet,featuresNameList):
+    classList=[example[-1] for example in dataSet]
+    if classList.count(classList[0])==len(classList):
+        return classList[0]
+    if len(dataSet[0])==1:
+        return majorityCnt(classList)
+    bestFeature=chooseBestFeatrueToSplit(dataSet)
+    bestFeatureName=featuresNameList[bestFeature]
+    myTree={bestFeatureName:{}}
+    del(featuresNameList[bestFeature])
+    featValues=[example[bestFeature] for example in dataSet]
+    uniqueVals=set(featValues)
+    for value in uniqueVals:
+        subFeaturesNameList=featuresNameList[:]
+        myTree[bestFeatureName][value]=createTree(splitDataSet(dataSet,bestFeature,value),subFeaturesNameList)
+    return myTree
+
+myTree=createTree(myData,featuresNameList)
+print(myTree)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

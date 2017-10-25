@@ -26,6 +26,7 @@ def createDataSet():
 
 myData,featuresNameList=createDataSet()
 print(myData)
+print(featuresNameList)
 
 print(calcShannonEntropy(myData))
 
@@ -96,6 +97,43 @@ def createTree(dataSet,featuresNameList):
 
 myTree=createTree(myData,featuresNameList)
 print(myTree)
+
+
+def classify(inputTree,featLabels,testVec):
+    firstStr=list(inputTree)[0]
+    secondDict=inputTree[firstStr]
+    featIndex=featLabels.index(firstStr)
+    for key in secondDict.keys():
+        if testVec[featIndex]==key:
+            if type(secondDict[key]).__name__=='dict':
+                classLabel=classify(secondDict[key],featLabels,testVec)
+            else:
+                classLabel=secondDict[key]
+    return classLabel
+
+def storeTree(inputTree,filename):
+    import pickle
+    fw=open(filename,'wb')
+    pickle.dump(inputTree,fw)
+    fw.close()
+
+def grabTree(filename):
+    import pickle
+    fr=open(filename,'rb')
+    return pickle.load(fr)
+
+#storeTree(myTree,'classifierStorage.txt')
+#print(grabTree('classifierStorage.txt'))
+
+fr=open('lenses.txt')
+lenses=[inst.strip().split('\t') for inst in fr.readlines()]
+lensesFeatNames=['age','prescript','astigmatic','tearRate']
+lensesTree=createTree(lenses,lensesFeatNames)
+print(lensesTree)
+import treePlotter
+treePlotter.createPlot(lensesTree)
+
+
 
 
 
